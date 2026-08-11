@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Control de Stock</title>
+    
+    <!-- Favicon para la pestaña del navegador -->
+    <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Barra Superior de Usuario (Alineada a la derecha) -->
+        {% if user.is_authenticated %}
+        <div class="flex justify-end items-center gap-3 mb-3">
+            <span class="text-sm font-medium text-slate-600 bg-white px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-1.5">
+                👤 <strong class="text-slate-800">{{ user.username }}</strong>
+            </span>
+            <form action="{% url 'logout' %}" method="post" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-emerald-800 hover:bg-slate-800 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-colors shadow-sm">
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Contenedor Principal -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+
+            <!-- Cabecera -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b pb-4">
+    <div class="flex items-center gap-4">
+        <img src="{% static 'img/logo.jpg' %}" alt="StockFlow Logo" class="h-20 w-auto object-contain rounded-lg shadow-sm">
+        <h1 class="text-3xl font-bold text-slate-800">
+            Control de Stock - StockFlow
+        </h1>
+    </div>
+
+    <div class="flex flex-wrap gap-2 shrink-0">
+        {% if user.is_staff %}
+        <a href="{% url 'category_list' %}" class="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-slate-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            🏷️ Categorías
+        </a>
+        {% endif %}
+
+        <a href="{% url 'record_movement' %}" class="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-slate-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            🔄 Registrar Movimiento
+        </a>
+
+        <a href="{% url 'movement_list' %}" class="bg-blue-700 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-slate-800 font-medium transition-colors shadow-sm flex items-center gap-1">
+            📋 Historial
+        </a>
+
+        {% if user.is_staff %}
+        <a href="{% url 'product_create' %}" class="bg-slate-800 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-emerald-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            + Nuevo Producto
+        </a>
+        <a href="{% url 'dashboard' %}" class="bg-slate-800 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-emerald-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            📊 Dashboard
+        </a>
+        <a href="{% url 'executive_report' %}" class="bg-slate-800 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-emerald-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            📈 Reporte Ejecutivo
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+            <!-- Barra de Búsqueda y Filtros -->
+            <form method="get"
+                class="bg-slate-50 p-4 rounded-lg border mb-6 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex flex-wrap gap-3 flex-1 min-w-[280px]">
+                    <input type="text" name="q" value="{{ query }}" placeholder="Buscar por SKU o Nombre..."
+                        class="p-2 border border-gray-300 rounded-md text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                    <select name="category"
+                        class="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todas las Categorías</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" name="low_stock" value="1" {% if low_stock == "1" %}checked{% endif %} class="rounded text-blue-600">
+                        <span>Solo Stock Bajo</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit"
+                        class="bg-slate-800 text-white px-4 py-2 text-sm rounded-md hover:bg-slate-900 transition-colors">
+                        🔍 Filtrar
+                    </button>
+                    {% if query or selected_category or low_stock %}
+                    <a href="{% url 'product_list' %}"
+                        class="bg-gray-200 text-gray-700 px-3 py-2 text-sm rounded-md hover:bg-gray-300 transition-colors">
+                        Limpiar
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <!-- Tabla de Productos -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b bg-slate-50 text-sm text-gray-600">
+                            <th class="p-3">Imagen</th>
+                            <th class="p-3">SKU</th>
+                            <th class="p-3">Nombre</th>
+                            <th class="p-3">Categoría</th>
+                            <th class="p-3">Precio</th>
+                            <th class="p-3">Stock Actual</th>
+                            <th class="p-3">Estado</th>
+                            <th class="p-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr class="border-b hover:bg-gray-50 text-sm">
+                            <td class="p-3">
+                                {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                                         onclick="openProductModal('{{ product.name|escapejs }}', '{{ product.sku|escapejs }}', '{{ product.category.name|default:'Sin categoría'|escapejs }}', '{{ product.price }}', '{{ product.current_stock }}', '{{ product.description|default:'Sin descripción disponible.'|escapejs }}', '{{ product.image_url }}')"
+                                         class="w-12 h-12 object-cover rounded-lg border shadow-sm cursor-pointer hover:scale-105 hover:opacity-90 transition-all duration-200">
+                                {% else %}
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg border flex items-center justify-center text-lg text-gray-400">
+                                        📦
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 text-gray-500 font-mono text-xs">{{ product.sku }}</td>
+                            <td class="p-3 font-semibold text-gray-800">{{ product.name }}</td>
+                            <td class="p-3 text-gray-600">{{ product.category.name|default:"Sin categoría" }}</td>
+                            <td class="p-3 text-gray-700 font-medium">${{ product.price }}</td>
+                            <td class="p-3 font-bold text-gray-800">{{ product.current_stock }}</td>
+                            <td class="p-3">
+                                {% if product.current_stock <= product.min_stock %}
+                                    <span class="bg-red-100 text-red-800 text-xs px-2.5 py-1 rounded-full font-bold">Stock Bajo</span>
+                                {% else %}
+                                    <span class="bg-green-100 text-green-800 text-xs px-2.5 py-1 rounded-full font-bold">Normal</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-3 text-center">
+                                {% if user.is_staff %}
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{% url 'product_update' product.pk %}"
+                                            class="text-blue-600 hover:text-blue-800 font-medium text-xs bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded transition-colors">
+                                            ✏️ Editar
+                                        </a>
+                                        <a href="{% url 'product_delete' product.pk %}"
+                                            class="text-red-600 hover:text-red-800 font-medium text-xs bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded transition-colors">
+                                            🗑️ Eliminar
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <span class="text-xs text-slate-400 italic">Solo lectura</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="p-4 text-center text-gray-500">No hay productos registrados aún.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLE DE PRODUCTO -->
+    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all">
+            
+            <div class="flex justify-between items-center p-4 border-b bg-slate-50">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Detalle del Producto</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold p-1">
+                    ✕
+                </button>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div class="flex justify-center bg-gray-50 p-3 rounded-lg border">
+                    <img id="modalImage" src="" alt="" class="max-h-64 object-contain rounded-md shadow-sm">
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <span id="modalSku" class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded border"></span>
+                        <span id="modalCategory" class="text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded ml-2"></span>
+                    </div>
+
+                    <h2 id="modalName" class="text-xl font-bold text-gray-800"></h2>
+
+                    <div class="border-t border-b py-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase">Descripción</p>
+                        <p id="modalDescription" class="text-sm text-gray-600 mt-1"></p>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <div>
+                            <p class="text-xs text-gray-400">Stock Disponible</p>
+                            <p id="modalStock" class="text-lg font-bold text-slate-800"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400">Precio Unitario</p>
+                            <p id="modalPrice" class="text-2xl font-extrabold text-emerald-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t bg-gray-50 flex justify-end">
+                <button onclick="closeProductModal()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                    Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT JS PARA EL MODAL -->
+    <script>
+        function openProductModal(name, sku, category, price, stock, description, imageUrl) {
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalSku').innerText = 'SKU: ' + sku;
+            document.getElementById('modalCategory').innerText = category;
+            document.getElementById('modalPrice').innerText = '$' + price;
+            document.getElementById('modalStock').innerText = stock + ' unidades';
+            document.getElementById('modalDescription').innerText = description;
+            document.getElementById('modalImage').src = imageUrl;
+
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeProductModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

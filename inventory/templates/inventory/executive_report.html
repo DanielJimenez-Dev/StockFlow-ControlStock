@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Reporte Ejecutivo de Rotación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen">
+
+    <!-- Navbar -->
+    <header class="bg-slate-900 text-white p-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">📦 StockFlow - Métricas Avanzadas</h1>
+            <div class="flex items-center gap-4">
+                <a href="{% url 'product_list' %}" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg transition-colors">Volver al Inventario</a>
+                <a href="{% url 'dashboard' %}" class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-2 rounded-lg transition-colors">Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-6">
+
+        <!-- Selector de Período, Filtro y Botones de Exportación -->
+<div class="bg-white p-4 rounded-xl shadow-sm border flex flex-col md:flex-row justify-between items-center gap-4">
+    <div>
+        <h2 class="text-lg font-bold text-slate-800">📈 Análisis de Rotación de Inventario</h2>
+        <p class="text-xs text-slate-500">Evaluación de flujo de productos e inventario inmovilizado.</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+        <!-- Selector de Período -->
+        <form method="get" class="flex items-center gap-2">
+            <label for="days" class="text-xs font-semibold text-slate-600">Período:</label>
+            <select name="days" id="days" onchange="this.form.submit()" class="border rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="7" {% if days_range == 7 %}selected{% endif %}>Últimos 7 días</option>
+                <option value="30" {% if days_range == 30 %}selected{% endif %}>Últimos 30 días</option>
+                <option value="90" {% if days_range == 90 %}selected{% endif %}>Últimos 90 días</option>
+                <option value="365" {% if days_range == 365 %}selected{% endif %}>Último Año</option>
+            </select>
+        </form>
+
+        <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+
+        <!-- Botones de Exportación -->
+                <a href="{% url 'export_executive_pdf' %}?days={{ days_range }}" 
+                class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                    📄 Exportar PDF
+                </a>
+
+                <a href="{% url 'export_executive_excel' %}?days={{ days_range }}" 
+                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-3 rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                    📊 Exportar Excel
+                </a>
+            </div>
+        </div>
+
+        <!-- KPIs Ejecutivos -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                <p class="text-xs font-bold text-slate-400 uppercase">Unidades Despachadas</p>
+                <p class="text-2xl font-black text-slate-800 mt-1">{{ total_units_sold }} u.</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                <p class="text-xs font-bold text-slate-400 uppercase">Valor Salidas (Estimado)</p>
+                <p class="text-2xl font-black text-emerald-600 mt-1">${{ total_revenue_estimated|floatformat:2 }}</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border shadow-sm">
+                <p class="text-xs font-bold text-slate-400 uppercase">Productos Sin Movimiento</p>
+                <p class="text-2xl font-black text-rose-600 mt-1">{{ stagnant_products_count }} SKUs</p>
+            </div>
+        </div>
+
+        <!-- Tabla de Rotación por Producto -->
+        <div class="bg-white rounded-xl border shadow-sm overflow-hidden">
+            <div class="p-4 border-b bg-slate-50">
+                <h3 class="text-sm font-bold text-slate-700">Índice de Rotación por Producto</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase border-b">
+                        <tr>
+                            <th class="p-3">SKU</th>
+                            <th class="p-3">Producto</th>
+                            <th class="p-3">Stock Actual</th>
+                            <th class="p-3">Entradas</th>
+                            <th class="p-3">Salidas</th>
+                            <th class="p-3">Índice Rotación</th>
+                            <th class="p-3">Capital en Stock</th>
+                            <th class="p-3">Nivel de Rotación</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        {% for item in report_data %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-3 font-mono text-slate-500">{{ item.product.sku }}</td>
+                            <td class="p-3 font-bold text-slate-800">{{ item.product.name }}</td>
+                            <td class="p-3 font-semibold">{{ item.product.stock }}</td>
+                            <td class="p-3 text-emerald-600 font-medium">+{{ item.in_units }}</td>
+                            <td class="p-3 text-rose-600 font-medium">-{{ item.out_units }}</td>
+                            <td class="p-3 font-bold text-slate-800">{{ item.turnover_rate }}</td>
+                            <td class="p-3 text-slate-700">${{ item.capital_in_stock|floatformat:2 }}</td>
+                            <td class="p-3">
+                                <span class="bg-{{ item.status_color }}-100 text-{{ item.status_color }}-800 font-bold px-2 py-0.5 rounded text-[10px]">
+                                    {{ item.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

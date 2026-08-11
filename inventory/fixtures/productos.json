@@ -1,0 +1,115 @@
+[
+    {
+        "model": "inventory.category",
+        "pk": 1,
+        "fields": {
+            "name": "Deportes",
+            "description": "Artículos y equipamiento deportivo",
+            "created_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 2,
+        "fields": {
+            "name": "Tecnología",
+            "description": "Dispositivos y accesorios tecnológicos",
+            "created_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 3,
+        "fields": {
+            "name": "Electrónica",
+            "description": "Gadgets y componentes electrónicos",
+            "created_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 4,
+        "fields": {
+            "name": "Hogar",
+            "description": "Electrodomésticos y elementos para el hogar",
+            "created_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 5,
+        "fields": {
+            "name": "Indumentaria",
+            "description": "Ropa y calzado deportivo y casual",
+            "created_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.product",
+        "pk": 1,
+        "fields": {
+            "sku": "DEP-001",
+            "name": "Pelota de Fútbol Profesional",
+            "category": 1,
+            "description": "Pelota de cuero sintético número 5.",
+            "price": "28000.00",
+            "current_stock": 15,
+            "min_stock": 5,
+            "image_url": "https://images.unsplash.com/photo-1614632537190-23e4146777db?auto=format&fit=crop&w=300&q=80",
+            "is_active": true,
+            "created_at": "2026-08-01T10:00:00Z",
+            "updated_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.product",
+        "pk": 2,
+        "fields": {
+            "sku": "TEC-001",
+            "name": "Auriculares Bluetooth Inalámbricos",
+            "category": 2,
+            "description": "Cancelación de ruido activa y batería de 24 hs.",
+            "price": "45000.00",
+            "current_stock": 8,
+            "min_stock": 3,
+            "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80",
+            "is_active": true,
+            "created_at": "2026-08-01T10:00:00Z",
+            "updated_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.product",
+        "pk": 3,
+        "fields": {
+            "sku": "HOG-001",
+            "name": "Cafetera Express Automática",
+            "category": 4,
+            "description": "Presión de 15 bares con espumador de leche.",
+            "price": "120000.00",
+            "current_stock": 2,
+            "min_stock": 4,
+            "image_url": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&fit=crop&w=300&q=80",
+            "is_active": true,
+            "created_at": "2026-08-01T10:00:00Z",
+            "updated_at": "2026-08-01T10:00:00Z"
+        }
+    },
+    {
+        "model": "inventory.product",
+        "pk": 4,
+        "fields": {
+            "sku": "IND-001",
+            "name": "Zapatillas Deportivas Running",
+            "category": 5,
+            "description": "Suela con amortiguación y tejido respirable.",
+            "price": "65000.00",
+            "current_stock": 20,
+            "min_stock": 6,
+            "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=300&q=80",
+            "is_active": true,
+            "created_at": "2026-08-01T10:00:00Z",
+            "updated_at": "2026-08-01T10:00:00Z"
+        }
+    }
+]

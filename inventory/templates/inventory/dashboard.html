@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Dashboard de Métricas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos dinámicos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Cabecera -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-xl shadow-sm border">
+            <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                📊 Dashboard de Métricas - StockFlow
+            </h1>
+            <a href="{% url 'product_list' %}" class="bg-slate-800 text-white px-4 py-2 text-sm rounded-lg hover:bg-slate-900 transition-colors">
+                📦 Ir al Inventario
+            </a>
+        </div>
+
+        <!-- Tarjetas de KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- KPI 1: Valorización del Inventario -->
+            <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col justify-between">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Valorización Inventario</p>
+                <p class="text-2xl font-extrabold text-emerald-600 mt-2">${{ inventory_value|floatformat:2 }}</p>
+                <p class="text-xs text-gray-400 mt-1">Capital en mercadería</p>
+            </div>
+
+            <!-- KPI 2: Total Productos -->
+            <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col justify-between">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Productos</p>
+                <p class="text-2xl font-extrabold text-blue-600 mt-2">{{ total_products }}</p>
+                <p class="text-xs text-gray-400 mt-1">Items registrados</p>
+            </div>
+
+            <!-- KPI 3: Stock Bajo -->
+            <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col justify-between">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Alertas de Stock Bajo</p>
+                <p class="text-2xl font-extrabold text-rose-600 mt-2">{{ low_stock_count }}</p>
+                <p class="text-xs text-gray-400 mt-1">Productos por reponer</p>
+            </div>
+
+            <!-- KPI 4: Categorías -->
+            <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col justify-between">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Categorías</p>
+                <p class="text-2xl font-extrabold text-slate-700 mt-2">{{ total_categories }}</p>
+                <p class="text-xs text-gray-400 mt-1">Sectores activos</p>
+            </div>
+
+        </div>
+
+        <!-- Sección de Gráficos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Gráfico 1: Distribución por Categoría -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">Productos por Categoría</h2>
+                <div class="relative h-64">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico 2: Top 5 Más Vendidos / Salidas -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">Top 5 Productos con Más Salidas</h2>
+                <div class="relative h-64">
+                    <canvas id="topSalesChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts de Renderizado con Chart.js -->
+    <script>
+        // 1. Gráfico de Categorías (Dona)
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ cat_labels|safe }},
+                datasets: [{
+                    data: {{ cat_counts|safe }},
+                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // 2. Gráfico Top Salidas (Barras)
+        const salesCtx = document.getElementById('topSalesChart').getContext('2d');
+        new Chart(salesCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ top_labels|safe }},
+                datasets: [{
+                    label: 'Unidades Despachadas',
+                    data: {{ top_counts|safe }},
+                    backgroundColor: '#6366F1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

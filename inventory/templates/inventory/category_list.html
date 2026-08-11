@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Gestión de Categorías</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        
+        <!-- Cabecera -->
+        <div class="flex justify-between items-center border-b pb-4 mb-6">
+            <h1 class="text-2xl font-bold text-slate-800">🏷️ Gestión de Categorías</h1>
+            <a href="{% url 'product_list' %}" class="bg-gray-500 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-gray-600 transition-colors">
+                ⬅️ Volver al Inventario
+            </a>
+        </div>
+
+        <!-- Formulario para agregar -->
+        <form method="post" class="bg-slate-50 p-4 rounded-lg border mb-6 flex gap-3 items-center">
+            {% csrf_token %}
+            <div class="flex-1">
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Nueva Categoría</label>
+                {{ form.name }}
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors self-end">
+                + Agregar
+            </button>
+        </form>
+
+        <!-- Lista de Categorías Existentes -->
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Categorías Registradas</h2>
+        <div class="border rounded-lg overflow-hidden">
+            <ul class="divide-y divide-gray-200">
+                {% for category in categories %}
+                    <li class="p-3 bg-white flex justify-between items-center hover:bg-gray-50 text-sm">
+                        <span class="font-medium text-gray-700">{{ category.name }}</span>
+                        <span class="text-xs text-gray-400 font-mono">ID: {{ category.id }}</span>
+                    </li>
+                {% empty %}
+                    <li class="p-4 text-center text-gray-500 text-sm">No hay categorías registradas.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

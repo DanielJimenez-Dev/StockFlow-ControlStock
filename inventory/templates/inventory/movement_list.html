@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Historial de Movimientos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        
+        <!-- Cabecera -->
+<div class="flex flex-wrap sm:flex-nowrap justify-between items-center gap-4 mb-6">
+    <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+        📋 Historial de Movimientos
+    </h1>
+    <div class="flex flex-wrap items-center gap-2">
+        <!-- Botón Exportar Excel -->
+        <a href="{% url 'export_movements_excel' %}?date_from={{ date_from }}&date_to={{ date_to }}&product={{ selected_product|default:'' }}&movement_type={{ selected_type }}&q={{ search_query }}"
+           class="bg-emerald-600 text-white px-3 py-2 text-sm rounded-lg hover:bg-emerald-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            📊 Excel
+        </a>
+
+        <!-- Botón Exportar PDF -->
+        <a href="{% url 'export_movements_pdf' %}?date_from={{ date_from }}&date_to={{ date_to }}&product={{ selected_product|default:'' }}&movement_type={{ selected_type }}&q={{ search_query }}"
+           class="bg-rose-600 text-white px-3 py-2 text-sm rounded-lg hover:bg-rose-700 font-medium transition-colors shadow-sm flex items-center gap-1">
+            📄 PDF
+        </a>
+
+        <!-- Botón Modal Totales -->
+        <button onclick="openTotalModal()" class="bg-indigo-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-indigo-700 font-semibold transition-colors shadow-sm flex items-center gap-1">
+            💰 Generar Total
+        </button>
+
+        <!-- Volver -->
+        <a href="{% url 'product_list' %}" class="bg-slate-700 text-white px-3 py-2 text-sm rounded-lg hover:bg-slate-800 font-medium">
+            ⬅️ Volver al Inventario
+        </a>
+    </div>
+</div>
+
+        <!-- Panel de Filtros -->
+        <form method="get" class="bg-slate-50 p-4 rounded-lg border mb-6 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <!-- Fecha Desde -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Desde</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" class="w-full p-2 border rounded-md text-sm">
+                </div>
+                <!-- Fecha Hasta -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Hasta</label>
+                    <input type="date" name="date_to" value="{{ date_to }}" class="w-full p-2 border rounded-md text-sm">
+                </div>
+                <!-- Producto -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Producto</label>
+                    <select name="product" class="w-full p-2 border rounded-md text-sm">
+                        <option value="">Todos los productos</option>
+                        {% for p in products %}
+                            <option value="{{ p.id }}" {% if selected_product == p.id %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Tipo -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tipo Movimiento</label>
+                    <select name="movement_type" class="w-full p-2 border rounded-md text-sm">
+                        <option value="">Todos los tipos</option>
+                        <option value="IN" {% if selected_type == 'IN' %}selected{% endif %}>Entrada</option>
+                        <option value="OUT" {% if selected_type == 'OUT' %}selected{% endif %}>Salida</option>
+                    </select>
+                </div>
+                <!-- Búsqueda Libre (Motivo/Usuario/Razón Social) -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Búsqueda libre</label>
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Motivo, Razón Social, Usuario..." class="w-full p-2 border rounded-md text-sm">
+                </div>
+            </div>
+
+            <!-- Botones Filtro -->
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button type="submit" class="bg-slate-800 text-white px-4 py-1.5 text-sm rounded-md hover:bg-slate-900 transition-colors">
+                    🔍 Filtrar
+                </button>
+                {% if date_from or date_to or selected_product or selected_type or search_query %}
+                    <a href="{% url 'movement_list' %}" class="bg-gray-200 text-gray-700 px-3 py-1.5 text-sm rounded-md hover:bg-gray-300 transition-colors">
+                        Limpiar
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b bg-slate-50 text-xs uppercase font-semibold text-gray-600">
+                        <th class="p-3">Fecha y Hora</th>
+                        <th class="p-3">Producto</th>
+                        <th class="p-3">Tipo</th>
+                        <th class="p-3">Cantidad</th>
+                        <th class="p-3">Razón Social / Entidad</th>
+                        <th class="p-3">Motivo</th>
+                        <th class="p-3">Usuario</th>
+                        <th class="p-3 text-right">Subtotal Est.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mov in movements %}
+                    <tr class="border-b hover:bg-gray-50 text-sm">
+                        <td class="p-3 text-gray-500 font-mono text-xs">{{ mov.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="p-3 font-semibold text-slate-800">{{ mov.product.name }}</td>
+                        <td class="p-3">
+                            {% if mov.movement_type == 'IN' %}
+                                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded font-bold">Entrada</span>
+                            {% else %}
+                                <span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">Salida / Venta</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3 font-bold">{{ mov.quantity }}</td>
+                        <td class="p-3 text-slate-700 font-medium">{{ mov.entity_name|default:"-" }}</td>
+                        <td class="p-3 text-gray-600">{{ mov.reason|default:"-" }}</td>
+                        <td class="p-3 text-gray-500 text-xs">{{ mov.user.username|default:"Sistema" }}</td>
+                        <td class="p-3 text-right font-mono font-medium text-slate-700">${{ mov.subtotal }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="p-6 text-center text-gray-500">No se encontraron movimientos con los filtros seleccionados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- MODAL GENERAR TOTAL -->
+    <div id="totalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-xl font-bold text-slate-800">📊 Resumen Monetario de Filtros</h3>
+                <button onclick="closeTotalModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
+            </div>
+
+            <p class="text-xs text-gray-500">
+                Basado en <strong>{{ total_records }}</strong> movimientos filtrados actualmente.
+            </p>
+
+            <div class="grid grid-cols-1 gap-4">
+                
+                <!-- Caja Venta / Salidas (VERDE) -->
+                <div class="bg-emerald-50 border-2 border-emerald-500 p-4 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold uppercase text-emerald-700">Total Ventas / Salidas</span>
+                        <span class="text-xs bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-bold">{{ units_out }} unidades</span>
+                    </div>
+                    <p class="text-3xl font-extrabold text-emerald-600">${{ total_out }}</p>
+                    <p class="text-xs text-emerald-700 mt-1">Ingreso bruto generado por ventas o despachos.</p>
+                </div>
+
+                <!-- Caja Ingresos a Tienda / Entradas (ÍNDIGO/AZUL) -->
+                <div class="bg-indigo-50 border-2 border-indigo-500 p-4 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold uppercase text-indigo-700">Total Entradas a Tienda</span>
+                        <span class="text-xs bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded-full font-bold">{{ units_in }} unidades</span>
+                    </div>
+                    <p class="text-3xl font-extrabold text-indigo-600">${{ total_in }}</p>
+                    <p class="text-xs text-indigo-700 mt-1">Valor de la mercadería surtida / compras de stock.</p>
+                </div>
+
+            </div>
+
+            <div class="flex justify-end pt-3 border-t">
+                <button onclick="closeTotalModal()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                    Entendido
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script JS -->
+    <script>
+        function openTotalModal() {
+            document.getElementById('totalModal').classList.remove('hidden');
+        }
+
+        function closeTotalModal() {
+            document.getElementById('totalModal').classList.add('hidden');
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeTotalModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow - Registrar Movimiento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-8">
+    <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-6 text-slate-800">🔄 Registrar Movimiento de Stock</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-1">Producto</label>
+                {{ form.product }}
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Tipo de Movimiento</label>
+                    {{ form.movement_type }}
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1">Cantidad</label>
+                    {{ form.quantity }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-1">Razón Social / Cliente / Proveedor</label>
+                {{ form.entity_name }}
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-semibold mb-1">Motivo / Observación</label>
+                {{ form.reason }}
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <a href="{% url 'product_list' %}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancelar</a>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Registrar Movimiento</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
