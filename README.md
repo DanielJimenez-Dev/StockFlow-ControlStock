@@ -1,9 +1,9 @@
 # 📦 StockFlow - Sistema de Control de Inventario y Stock
 
 **Desarrollado por:** Daniel Jiménez  
-**Estado:** En desarrollo activo (v1.6 - Listo para Deploy)
-**Linkedin:** https://www.linkedin.com/in/jimenezvalderramadaniel/
-
+**Estado:** En desarrollo activo (v1.6 - Listo para Deploy)  
+**LinkedIn:** https://www.linkedin.com/in/jimenezvalderramadaniel/  
+**🚀 Demo en vivo / Web App:** https://stockflow-controlstock.onrender.com
 ---
 
 ## 🛠️ Stack Tecnológico & Arquitectura
@@ -86,10 +86,3 @@ Para evaluar el sistema bajo distintas jerarquías de acceso:
   - Exportación dedicada del reporte ejecutivo a formatos **PDF** y **Excel**.
 
 ---
-
-## 📌 Plan de Trabajo & Próximas Actividades
-
-1. **🚀 Despliegue a Producción (Deploy Final)**
-   - Configuración de servidores WSGI con `gunicorn`.
-   - Gestión eficiente de archivos estáticos con `whitenoise`.
-   - Publicación en plataforma Cloud (Render / Railway).
