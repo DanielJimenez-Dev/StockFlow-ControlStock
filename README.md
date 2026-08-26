@@ -1,3 +1,80 @@
+# 📦 StockFlow - Inventory & Stock Control System
+
+**Developed by:** Daniel Jiménez  
+**Status:** Active Development (v1.6 - Production Ready)  
+**LinkedIn:** https://www.linkedin.com/in/jimenezvalderramadaniel/  
+**🚀 Live Demo / Web App:** https://stockflow-controlstock.onrender.com
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+### Backend
+- **Language:** Python 3.12+
+- **Primary Framework:** Django 5.2.11
+- **API & Integrations:** Django REST Framework 3.17.1 (`djangorestframework`) & Django CORS Headers 4.9.0 (`django-cors-headers`) for decoupled frontend integration.
+- **Authentication & Security:** Django Auth System (Sessions, Cookies, Decorators, and Role-Based Access Control - RBAC).
+
+### Frontend & UI
+- **Structure & Styling:** HTML5, Tailwind CSS (CDN).
+- **Logic & Interactivity:** Vanilla JavaScript / TypeScript logic (Modals, DOM event handling, keyboard shortcuts).
+- **Data Visualization:** Chart.js (Dynamic and interactive charts).
+- **Branding:** Official corporate logotype integrated across headers, login UI, and browser favicon.
+
+### Database & Persistence
+- **Engine:** SQLite3 (Local Development) / Configured for PostgreSQL (Production).
+- **ORM:** Django ORM.
+- **Image Management:** Pillow 12.3.0 (`Pillow`).
+
+### Libraries & Reporting
+- **openpyxl (v3.1.5):** Tabular report export/import in Microsoft Excel (.xlsx).
+- **ReportLab (v5.0.0):** Dynamic PDF document generation (.pdf).
+
+---
+
+## 🔐 Live Demo Test Credentials
+
+To evaluate the system under different access hierarchies:
+
+### 🛠️ Admin User (Superuser)
+- **Username:** `admin`
+- **Password:** `administradorcerouno`
+- **Permissions:** Full access to product management (Create/Read/Update/Delete), category administration, executive metrics on Dashboard, and Django `/admin/` panel.
+
+### 👤 Employee User (Standard Operator)
+- **Username:** `operador1`
+- **Password:** `operador1`
+- **Permissions:** Restricted catalog access (Read-Only mode), recording stock in/out movements, and viewing operation history.
+
+---
+
+## 🚀 Key Features Implemented
+
+### 1. 🔐 Authentication, Session & Visual Identity
+- Optimized login screen with vector branding and zero typographic redundancy.
+- Global route protection using `@login_required` decorators across all critical views.
+- Active user indicator and logout functionality in navigation header.
+
+### 2. 👥 Role-Based Access Control (RBAC)
+- Dynamic UI element hiding (*+ New Product*, *Categories*, *Dashboard*) based on user roles (`user.is_staff`).
+- Employee-level restriction enforcing "Read-Only" labels on administrative actions.
+
+### 3. 📦 Inventory & Product Module
+- Full CRUD operations for products and categories (Admin restricted).
+- Interactive table with processed thumbnail images.
+- Low-stock dynamic badge alerts when current stock meets or drops below minimum thresholds.
+- Advanced filtering: SKU/name search, category selection, and "Low stock only" conditional toggle.
+
+### 4. 📋 Audit History & Movement Logs
+- Inbound (`IN`) and Outbound (`OUT`) stock transactions automatically tied to authenticated users.
+- Multi-criteria filtering by date range, product, movement type, and free search.
+- **Report Exports:** Download filtered history in **PDF** (ReportLab) and **Excel** (openpyxl) formats.
+
+### 5. 📊 Dashboard & Stock Turnover Analytics
+- **KPI Metrics Panel:** Total inventory valuation ($), registered products count, low stock alerts, and active categories.
+- **Dynamic Charts (Chart.js):** Product category distribution (Doughnut) and Top 5 items by outbound volume (Bar Chart).
+- **Executive Turnover Report:** Timeframe analysis (7, 30, 90, 365 days) calculating Turnover Index, Dispatched Units, Capital in Stock, and deadstock identification.
+
 # 📦 StockFlow - Sistema de Control de Inventario y Stock
 
 **Desarrollado por:** Daniel Jiménez  
@@ -37,7 +114,7 @@ Para evaluar el sistema bajo distintas jerarquías de acceso:
 
 ### 🛠️ Usuario Administrador (Superusuario)
 - **Usuario:** `admin`
-- **Contraseña:** `admin1234`
+- **Contraseña:** `administradorcerouno`
 - **Permisos:** Acceso total a gestión de productos (Alta/Baja/Modificación), administración de categorías, métricas ejecutivas en el Dashboard y acceso al panel `/admin/`.
 
 ### 👤 Usuario Empleado (Operador Estándar)
